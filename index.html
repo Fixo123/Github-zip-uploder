@@ -221,8 +221,7 @@
             color: #8b949e;
             font-size: 12px;
         }
-        input,
-        select {
+        input {
             width: 100%;
             padding: 12px 16px;
             background: #0d1117;
@@ -378,6 +377,10 @@
             font-weight: 500;
             border: 1px solid #2a2f3a;
             transition: all 0.3s;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .badge.success {
             border-color: #3fb950;
@@ -462,7 +465,7 @@
             filter: drop-shadow(0 0 10px rgba(108, 99, 255, 0.4));
         }
 
-        /* ===== CONFETTI / CELEBRATION ===== */
+        /* ===== CONFETTI ===== */
         .confetti-container {
             position: fixed;
             top: 0;
@@ -508,21 +511,21 @@
 </head>
 <body>
 
-    <!-- ===== ANIMATED BACKGROUND ===== -->
+    <!-- ANIMATED BACKGROUND -->
     <div class="orb orb1"></div>
     <div class="orb orb2"></div>
     <div class="orb orb3"></div>
 
-    <!-- ===== CONFETTI CONTAINER ===== -->
+    <!-- CONFETTI CONTAINER -->
     <div class="confetti-container" id="confettiContainer"></div>
 
-    <!-- ===== LOADING SCREEN ===== -->
+    <!-- LOADING SCREEN -->
     <div id="loader-overlay">
         <div class="loader-spinner"></div>
         <div class="loader-text">Loading <span>Deployer</span> ...</div>
     </div>
 
-    <!-- ===== MAIN CARD ===== -->
+    <!-- MAIN CARD -->
     <div class="card">
         <div class="header">
             <h1>📦 ZIP → GitHub Deployer</h1>
@@ -560,11 +563,11 @@
             </div>
         </div>
 
-        <!-- ===== NEW: CUSTOM COMMIT MESSAGE ===== -->
+        <!-- CUSTOM COMMIT MESSAGE -->
         <div class="form-group">
             <label for="commitPrefix">✏️ Custom Commit Message <span class="optional">(with Emoji!)</span></label>
             <input type="text" id="commitPrefix" placeholder="e.g., 🚀 Upload: " value="🚀 Deploy: " />
-            <div class="input-hint">Type your favorite emoji + text. Example: <strong>📦 Push: </strong> or <strong>✨ Update: </strong></div>
+            <div class="input-hint">Type your favorite emoji + text. Example: <strong>😎 Push: </strong> or <strong>🎉 Update: </strong></div>
         </div>
 
         <div class="form-group">
@@ -576,7 +579,7 @@
 
         <button class="deploy-btn" id="deployBtn">🚀 Deploy to GitHub</button>
 
-        <!-- Progress Bar -->
+        <!-- PROGRESS BAR -->
         <div class="progress-wrapper">
             <div class="progress-bar-fill" id="progressBar"></div>
         </div>
@@ -650,7 +653,7 @@
                 percentCounter.textContent = percent + '%';
             }
 
-            // Confetti burst
+            // Confetti
             function fireConfetti() {
                 const colors = ['#6c63ff', '#00d4ff', '#ff6bcd', '#ffd93d', '#3fb950', '#f85149'];
                 for (let i = 0; i < 80; i++) {
@@ -747,6 +750,7 @@
                         failCount = 0,
                         totalFiles = fileEntries.length,
                         maxRetries = 5;
+                    let failedFiles = []; // Store failed file names
 
                     for (let i = 0; i < totalFiles; i++) {
                         const filename = fileEntries[i];
@@ -768,7 +772,6 @@
                                 const encodedPath = apiPath.split('/').map(encodeURIComponent).join('/');
                                 const url = `https://api.github.com/repos/${repo}/contents/${encodedPath}`;
 
-                                // ** USING CUSTOM COMMIT PREFIX HERE **
                                 const commitMessage = `${commitPrefix} ${filename}`;
 
                                 const response = await fetchWithTimeout(url, {
@@ -810,6 +813,7 @@
                                 } else {
                                     log(`❌ Failed (${i+1}/${totalFiles}): ${filename} - ${err.message}`, 'error');
                                     failCount++;
+                                    failedFiles.push(filename); // Store failed file
                                     uploaded = true;
                                 }
                             }
@@ -822,19 +826,22 @@
                         }
                     }
 
-                    // Final Summary
+                    // --- FINAL SUMMARY WITH FAILED FILE NAMES ---
                     log(`\n🏁 Deployment Complete!`, 'info');
                     log(`✅ Success: ${successCount}`, 'success');
-                    if (failCount > 0) log(`❌ Failed: ${failCount}`, 'error');
-
-                    if (failCount === 0 && successCount > 0) {
-                        setStatus(`✅ Done (${successCount})`, 'success');
-                        fireConfetti(); // 🎊 Celebrate!
-                        log(`🎉 All files deployed successfully with custom commit message!`, 'success');
-                    } else if (successCount > 0) {
-                        setStatus(`⚠️ Partial (${successCount}/${totalFiles})`, 'error');
+                    if (failCount > 0) {
+                        log(`❌ Failed: ${failCount}`, 'error');
+                        // Display each failed file
+                        failedFiles.forEach((f, idx) => {
+                            log(`   ${idx+1}. ${f}`, 'error');
+                        });
+                        // Also show in status badge
+                        const lastFailed = failedFiles[failedFiles.length - 1];
+                        setStatus(`⚠️ Partial (${successCount}/${totalFiles}) - Last fail: ${lastFailed}`, 'error');
                     } else {
-                        setStatus('❌ Failed', 'error');
+                        setStatus(`✅ Done (${successCount})`, 'success');
+                        fireConfetti();
+                        log(`🎉 All files deployed successfully!`, 'success');
                     }
 
                 } catch (error) {
@@ -853,4 +860,4 @@
         })();
     </script>
 </body>
-                                        </html>
+    </html>
