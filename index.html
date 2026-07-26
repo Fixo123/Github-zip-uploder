@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZIP to GitHub Deployer</title>
-    <!-- JSZip Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        /* -------------------- GLOBAL RESET & BASE -------------------- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
         }
-
         body {
             background: #080a0e;
             color: #c9d1d9;
@@ -26,8 +23,6 @@
             margin: 0;
             background-image: radial-gradient(circle at 20% 50%, #1a1f2e 0%, #080a0e 80%);
         }
-
-        /* -------------------- LOADING SCREEN -------------------- */
         #loader-overlay {
             position: fixed;
             top: 0;
@@ -77,8 +72,6 @@
             0%, 100% { opacity: 0.6; }
             50% { opacity: 1; }
         }
-
-        /* -------------------- MAIN CARD UI -------------------- */
         .card {
             background: rgba(21, 25, 35, 0.85);
             backdrop-filter: blur(12px);
@@ -94,7 +87,6 @@
         .card:hover {
             transform: translateY(-2px);
         }
-
         .header {
             margin-bottom: 28px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -116,7 +108,6 @@
             font-weight: 400;
             -webkit-text-fill-color: #8b949e;
         }
-
         .warning-note {
             background: rgba(210, 153, 34, 0.08);
             border-left: 4px solid #d29922;
@@ -132,7 +123,6 @@
         .warning-note strong {
             color: #f0c04a;
         }
-
         .form-group {
             margin-bottom: 18px;
         }
@@ -175,7 +165,6 @@
             margin-top: 5px;
             padding-left: 4px;
         }
-
         .row-duo {
             display: flex;
             gap: 14px;
@@ -183,7 +172,6 @@
         .row-duo .form-group {
             flex: 1;
         }
-
         .file-upload-wrapper input[type="file"] {
             padding: 14px;
             cursor: pointer;
@@ -210,7 +198,6 @@
         .file-upload-wrapper input[type="file"]::file-selector-button:hover {
             background: #30363d;
         }
-
         .deploy-btn {
             width: 100%;
             padding: 15px;
@@ -240,7 +227,6 @@
             box-shadow: none;
             background: #2a2f3a;
         }
-
         .stats {
             display: flex;
             justify-content: space-between;
@@ -260,7 +246,6 @@
         .badge.success { border-color: #3fb950; color: #3fb950; }
         .badge.error { border-color: #f85149; color: #f85149; }
         .badge.processing { border-color: #6c63ff; color: #b7b1ff; animation: pulse 1s infinite; }
-
         #logs {
             margin-top: 18px;
             background: #0a0d13;
@@ -290,7 +275,6 @@
         .log-error { color: #f85149; }
         .log-info { color: #58a6ff; }
         .log-warning { color: #d29922; }
-
         .footer-credit {
             margin-top: 28px;
             text-align: center;
@@ -313,7 +297,6 @@
         .footer-credit:hover strong {
             filter: drop-shadow(0 0 8px rgba(108, 99, 255, 0.4));
         }
-
         @media (max-width: 500px) {
             .card { padding: 24px 18px; }
             .row-duo { flex-direction: column; gap: 0; }
@@ -322,37 +305,29 @@
     </style>
 </head>
 <body>
-
-    <!-- LOADING SCREEN -->
     <div id="loader-overlay">
         <div class="loader-spinner"></div>
         <div class="loader-text">Loading <span>Deployer</span> ...</div>
     </div>
-
-    <!-- MAIN CARD -->
     <div class="card">
         <div class="header">
             <h1>📦 ZIP → GitHub Deployer</h1>
             <div class="subtitle">Upload a ZIP, auto-extract & push contents directly to your repository.</div>
         </div>
-
         <div class="warning-note">
             <span>🔒</span>
             <div><strong>Client-Side Only:</strong> Your Token & ZIP never touch our servers. Everything runs locally in your browser and communicates directly with the GitHub API.</div>
         </div>
-
         <div class="form-group">
             <label for="token">🔑 GitHub Personal Access Token</label>
             <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
             <div class="input-hint">Requires <strong>repo</strong> scope. Keep it secure.</div>
         </div>
-
         <div class="form-group">
             <label for="repo">📁 Repository</label>
             <input type="text" id="repo" placeholder="your-username/your-repo-name" />
-            <div class="input-hint">Example: <strong>john/app</strong> (must already exist).</div>
+            <div class="input-hint"><strong style="color:#f85149;">⚠️ Important:</strong> Enter only <strong>username/repo</strong> (e.g., <strong>Fixo123/Dark-dev-social-media-boost</strong>). Do NOT paste the full URL.</div>
         </div>
-
         <div class="row-duo">
             <div class="form-group">
                 <label for="branch">🌿 Branch</label>
@@ -364,23 +339,18 @@
                 <div class="input-hint">Leave empty to push to the root.</div>
             </div>
         </div>
-
         <div class="form-group">
             <label for="zipInput">📤 Select ZIP File</label>
             <div class="file-upload-wrapper">
                 <input type="file" id="zipInput" accept=".zip" />
             </div>
         </div>
-
         <button class="deploy-btn" id="deployBtn">🚀 Deploy to GitHub</button>
-
         <div class="stats">
             <span id="fileCounter">📄 Files: 0</span>
             <span id="statusBadge" class="badge">⏳ Idle</span>
         </div>
-
         <div id="logs">⚡ System initialized. Awaiting your input...</div>
-
         <div class="footer-credit">
             Developed by <strong>Fixo Dev</strong> 🚀
         </div>
@@ -400,30 +370,20 @@
             const loader = document.getElementById('loader-overlay');
 
             window.addEventListener('load', function() {
-                setTimeout(function() {
-                    loader.classList.add('hidden');
-                }, 800);
+                setTimeout(() => loader.classList.add('hidden'), 800);
             });
 
             function log(message, type = 'info') {
                 const time = new Date().toLocaleTimeString();
-                const formatted = `[${time}] ${message}`;
                 const span = document.createElement('span');
-                switch(type) {
-                    case 'success': span.className = 'log-success'; break;
-                    case 'error': span.className = 'log-error'; break;
-                    case 'warning': span.className = 'log-warning'; break;
-                    default: span.className = 'log-info';
-                }
-                span.textContent = formatted;
+                span.textContent = `[${time}] ${message}`;
+                span.className = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : type === 'warning' ? 'log-warning' : 'log-info';
                 logsDiv.appendChild(span);
                 logsDiv.appendChild(document.createElement('br'));
                 logsDiv.scrollTop = logsDiv.scrollHeight;
             }
 
-            function clearLogs() {
-                logsDiv.innerHTML = '';
-            }
+            function clearLogs() { logsDiv.innerHTML = ''; }
 
             function setStatus(text, state = 'idle') {
                 statusBadge.textContent = text;
@@ -442,10 +402,18 @@
 
             deployBtn.addEventListener('click', async () => {
                 const token = tokenInput.value.trim();
-                const repo = repoInput.value.trim();
+                let repo = repoInput.value.trim();
                 const branch = branchInput.value.trim() || 'main';
                 const targetPath = pathInput.value.trim();
                 const zipFile = zipInput.files[0];
+
+                // Fix: If user pastes the full URL, strip it down to owner/repo
+                if (repo.includes('github.com/')) {
+                    const parts = repo.split('github.com/');
+                    if (parts.length > 1) {
+                        repo = parts[1].replace(/\.git$/, '').replace(/\/$/, '');
+                    }
+                }
 
                 if (!token) { log('❌ Please enter your GitHub Personal Access Token.', 'error'); return; }
                 if (!repo) { log('❌ Please enter the repository (owner/repo).', 'error'); return; }
@@ -458,8 +426,7 @@
 
                 try {
                     const zip = await JSZip.loadAsync(zipFile);
-                    const files = Object.keys(zip.files);
-                    const fileEntries = files.filter(name => !zip.files[name].dir);
+                    const fileEntries = Object.keys(zip.files).filter(name => !zip.files[name].dir);
 
                     if (fileEntries.length === 0) {
                         log('⚠️ The ZIP archive appears to be empty.', 'warning');
@@ -468,15 +435,16 @@
                     }
 
                     fileCounter.textContent = `📄 Files: ${fileEntries.length}`;
-                    log(`✅ Found ${fileEntries.length} files in the archive.`, 'success');
+                    log(`✅ Found ${fileEntries.length} files.`, 'success');
 
                     let successCount = 0;
                     let failCount = 0;
-                    const BATCH_SIZE = 10; // එකවර Requests ගොඩක් යැවීම වළක්වන්න
                     const totalFiles = fileEntries.length;
+                    const BATCH_SIZE = 3; // Reduced to prevent network congestion
 
-                    // Function to upload a single file
-                    async function uploadFile(filename) {
+                    // Retry Logic Wrapper
+                    async function uploadWithRetry(filename, attempt = 1) {
+                        const maxRetries = 3;
                         try {
                             const fileData = zip.files[filename];
                             const contentBase64 = await fileData.async('base64');
@@ -488,15 +456,9 @@
                             }
                             apiPath = apiPath.replace(/\/+/g, '/');
 
-                            // *** මෙයයි FIX එක: සිංහල/යුනිකේත අකුරු සඳහා URL Encode කිරීම ***
+                            // URL Encode each segment
                             const encodedPath = apiPath.split('/').map(encodeURIComponent).join('/');
                             const url = `https://api.github.com/repos/${repo}/contents/${encodedPath}`;
-
-                            const payload = {
-                                message: `Deploy: ${filename} via Web ZIP Deployer`,
-                                content: contentBase64,
-                                branch: branch
-                            };
 
                             const response = await fetch(url, {
                                 method: 'PUT',
@@ -505,65 +467,69 @@
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/vnd.github.v3+json'
                                 },
-                                body: JSON.stringify(payload)
+                                body: JSON.stringify({
+                                    message: `Deploy: ${filename}`,
+                                    content: contentBase64,
+                                    branch: branch
+                                })
                             });
-
-                            const responseData = await response.json();
 
                             if (response.status === 201 || response.status === 200) {
                                 log(`✅ Success: ${filename}`, 'success');
                                 successCount++;
+                                return true;
                             } else {
-                                let errorMsg = responseData.message || 'Unknown API error.';
-                                if (response.status === 409) {
-                                    errorMsg = 'File already exists. Delete it first or use a different branch.';
-                                } else if (response.status === 403 && errorMsg.includes('rate limit')) {
-                                    errorMsg = 'GitHub API rate limit exceeded. Please wait a moment.';
-                                }
-                                log(`❌ Failed: ${filename} - ${errorMsg}`, 'error');
-                                failCount++;
+                                let errorMsg = await response.text();
+                                try { errorMsg = JSON.parse(errorMsg).message; } catch(e) {}
+                                if (response.status === 409) errorMsg = 'File already exists.';
+                                if (response.status === 403 && errorMsg.includes('rate limit')) errorMsg = 'Rate limit hit.';
+                                throw new Error(errorMsg);
                             }
                         } catch (err) {
-                            log(`🔥 Upload error for ${filename}: ${err.message}`, 'error');
-                            failCount++;
+                            if (attempt < maxRetries) {
+                                const delay = 2000 * attempt;
+                                log(`🔄 Retry ${attempt}/${maxRetries} for ${filename} (waiting ${delay/1000}s)...`, 'warning');
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                                return await uploadWithRetry(filename, attempt + 1);
+                            } else {
+                                log(`❌ Failed: ${filename} - ${err.message}`, 'error');
+                                failCount++;
+                                return false;
+                            }
                         }
                     }
 
-                    // Process files in batches to avoid overwhelming the browser/API
+                    // Process in batches
                     for (let i = 0; i < totalFiles; i += BATCH_SIZE) {
                         const batch = fileEntries.slice(i, i + BATCH_SIZE);
-                        const promises = batch.map(file => uploadFile(file));
+                        const promises = batch.map(file => uploadWithRetry(file));
                         await Promise.all(promises);
-                        
-                        // Update progress
+
                         const processed = Math.min(i + BATCH_SIZE, totalFiles);
                         log(`📊 Progress: ${processed}/${totalFiles} files processed.`, 'info');
                     }
 
-                    // Summary
-                    log(`\n🏁 Deployment process completed.`, 'info');
-                    log(`✅ Successful uploads: ${successCount}`, 'success');
-                    if (failCount > 0) log(`❌ Failed uploads: ${failCount}`, 'error');
+                    log(`\n🏁 Deployment Complete!`, 'info');
+                    log(`✅ Success: ${successCount}`, 'success');
+                    if (failCount > 0) log(`❌ Failed: ${failCount}`, 'error');
 
                     if (failCount === 0 && successCount > 0) {
                         setStatus(`✅ Done (${successCount} files)`, 'success');
-                    } else if (successCount > 0 && failCount > 0) {
+                    } else if (successCount > 0) {
                         setStatus(`⚠️ Partial (${successCount}/${totalFiles})`, 'error');
                     } else {
-                        setStatus('❌ Deployment failed', 'error');
+                        setStatus('❌ Failed', 'error');
                     }
 
                 } catch (error) {
                     console.error(error);
-                    log(`🔥 Critical System Error: ${error.message}`, 'error');
+                    log(`🔥 Critical Error: ${error.message}`, 'error');
                     setStatus('❌ System Error', 'error');
                 }
             });
 
             zipInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    log(`📎 Selected: ${this.files[0].name}`, 'info');
-                }
+                if (this.files.length > 0) log(`📎 Selected: ${this.files[0].name}`, 'info');
             });
 
             log('🟢 System Ready. Fill in the details and deploy.', 'info');
@@ -571,4 +537,4 @@
         })();
     </script>
 </body>
-                                                                                                             </html>
+    </html>
