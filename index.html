@@ -598,11 +598,266 @@
     </div>
 
     <script>
-        (function(){const _0x1a2b=['getElementById','hidden','classList','toLocaleTimeString','textContent','className','appendChild','createElement','br','scrollTop','scrollHeight','innerHTML','badge','processing','disabled','⏳ Deploying...','🚀 Deploying...','🚀 Deploy to GitHub','success','error','style','width','confetti-piece','random','background','floor','left','top','borderRadius','animationDuration','animationDelay','transform','rotate(','deg)','remove','AbortController','abort','Request timed out','signal','then','catch','value','trim','main','github.com/','replace','files','name','size','toFixed','headers','Authorization','token ','Accept','application/vnd.github.v3+json','status','loadAsync','keys','filter','dir','📄 Files: ',' sequential upload...','✏️ Commit message: "','base64','async','/','encodeURIComponent','join','PUT','Content-Type','application/json','message','parse','text','📊 Progress: ','\x0a🏁 Deployment Complete!','✅ Success: ','❌ Failed: ','   ','⚠️ Partial (','/','- Last fail: ','✅ Done (','🎉 All files deployed successfully!','🔥 Critical Error: ','❌ System Error','change','📎 Selected: ','🟢 System Ready. Customize your commit message above!','⏳ Idle','idle'];(function(_0x3c4d12,_0x1a2b3c){const _0x5e6f7a=function(_0x8a9b1c){while(--_0x8a9b1c){_0x3c4d12['push'](_0x3c4d12['shift']());}};_0x5e6f7a(++_0x1a2b3c);}(_0x1a2b,0x1f4));const _0x4d2e=function(_0x3c4d12,_0x1a2b3c){_0x3c4d12=_0x3c4d12-0x0;let _0x5e6f7a=_0x1a2b[_0x3c4d12];return _0x5e6f7a;};
+        (function() {
+            // DOM refs
+            const tokenInput = document.getElementById('token');
+            const repoInput = document.getElementById('repo');
+            const branchInput = document.getElementById('branch');
+            const pathInput = document.getElementById('path');
+            const commitPrefixInput = document.getElementById('commitPrefix');
+            const zipInput = document.getElementById('zipInput');
+            const deployBtn = document.getElementById('deployBtn');
+            const logsDiv = document.getElementById('logs');
+            const fileCounter = document.getElementById('fileCounter');
+            const statusBadge = document.getElementById('statusBadge');
+            const progressBar = document.getElementById('progressBar');
+            const percentCounter = document.getElementById('percentCounter');
+            const loader = document.getElementById('loader-overlay');
+            const confettiContainer = document.getElementById('confettiContainer');
 
-eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)r[e(c)]=k[c]||e(c);k=[function(e){return r[e]}];e=function(){return'\\w+'};c=1};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p}('(n(){3 a=d.c(\'17\'),b=d.c(\'18\'),e=d.c(\'19\'),f=d.c(\'1a\'),g=d.c(\'1b\'),h=d.c(\'1c\'),i=d.c(\'1d\'),j=d.c(\'1e\'),k=d.c(\'1f\'),l=d.c(\'1g\'),m=d.c(\'1h\'),o=d.c(\'1i\'),p=d.c(\'1j\');q.1k(\'1l\',()=>1m(()=>o.1n.1o(\'1p\'),1q));n 4(r,s=\'1r\'){3 t=1s Date().1t();3 u=d.1u(\'1v\');u.1w=`[${t}] ${r}`;u.1x=s===\'1y\'?\'1z\':s===\'1A\'?\'1B\':s===\'1C\'?\'1D\':\'1E\';j.1F(u);j.1F(d.1u(\'1G\'));j.1H=j.1I}n 1J(){j.1K=\'\'}n 1L(r,s=\'1M\'){k.1w=r;k.1x=\'1N\';1O(s===\'1P\'){k.1n.1o(\'1P\');i.1Q=1R;i.1w=\'⏳ 1S...\'}1T{i.1Q=1U;i.1w=\'🚀 1V 1W GitHub\';1O(s===\'1y\')k.1n.1o(\'1y\');1X 1O(s===\'1A\')k.1n.1o(\'1A\')}}n 1Y(r,s){3 t=s===0?0:Math.1Z((r/s)*100);l.1a0.1a1=t+\'%\';m.1w=t+\'%\'}n 1a2(){3 r=[\'#1a3\',\'#1a4\',\'#1a5\',\'#1a6\',\'#1a7\',\'#1a8\'];1a9(3 s=0;s<80;s++){3 t=d.1u(\'1v\');t.1x=\'1aa\';3 u=Math.1ab()*8+4;t.1a0.1a1=u+\'1ac\';t.1a0.1ad=u+\'1ac\';t.1a0.1ae=r[Math.1af(Math.1ab()*r.1ag)];t.1a0.1ah=Math.1ab()*100+\'%\';t.1a0.1ai=\'-1aj\';t.1a0.1ak=Math.1ab()>0.5?\'50%\':\'1al\';t.1a0.1am=(Math.1ab()*2+2)+\'s\';t.1a0.1an=(Math.1ab()*1.5)+\'s\';t.1a0.1ao=`1ap(${Math.1ab()*360}1aq)`;p.1F(t);1m(()=>t.1ar(),4000)}}n 1as(r,s,t=30000){1at 1au((u,v)=>{3 w=1sv 1aw();3 x=1m(()=>{w.1ax();v(1sy Error(\'1az 1aA 1aB\'))},t);1aC(r,{...s,1aD:w.1aD}).1aE(y=>{1aF(x);u(y)}).1aG(z=>{1aF(x);v(z)})})}i.1k(\'1aH\',1aI n(){3 r=a.1aJ.1aK();3 s=b.1aJ.1aK();3 t=e.1aJ.1aK()||\'1aL\';3 u=f.1aJ.1aK();3 v=g.1aJ.1aK()||\'🚀 1V: \';3 w=h.1aM[0];1O(s.1aN(\'1aO/\')){3 x=s.1aP(\'1aO/\');s=x[x.1ag-1].1aQ(/\\.1aR$/,\'\').1aQ(/\\/$/,\'\')}s=s.1aQ(/^\\/+/,\'\');1O(!r){4(\'❌ 1aS 1aT 1aU 1aV.\',\'1A\');1aW}1O(!s){4(\'❌ 1aS 1aT 1aX (1aY/s).\',\'1A\');1aW}1O(!w){4(\'❌ 1aZ 1a 1b0 1b1.\',\'1A\');1aW}1O(!s.1aN(\'/\')){4(\'❌ 1aX 1b2 1b3 "1aY/s" 1b4.\',\'1A\');1aW}1J();1L(\'1P...\',\'1P\');1Y(0,1);4(`📂 1b5: ${w.1b6} (${(w.1b7/1024).1b8(1)} 1b9)`,`1r`);1bA{4(`🔍 1bB s: ${s} ...`,`1r`);3 x=1bC 1as(`1bD://1bE.1bF.1bG/1bH/${s}`,{1bI:{\'1bJ\':`1bK ${r}`,\'1bL\':\'1bM/1bN.1bO.v3+1bP\'}});1O(x.1bQ===404){4(`❌ 1bR 1bS 1bT: 1bD://1bF.1bG/${s}`,\'1A\');4(`💡 1bU 1bV 1bW 1bX 1bF.`,\'1C\');1L(\'1bR 1bS 1bT\',\'1A\');1aW}1X 1O(x.1bQ===401||x.1bQ===403){4(`❌ 1aS 1bY: 1bZ 1c0 (1c1 "s" 1c2).`,\'1A\');1L(\'1aS 1bY\',\'1A\');1aW}1T{4(`✅ 1aX 1c3.`,\'1y\')}3 y=1bC JSZip.1c4(w);3 z=Object.1c5(y.1aM).1c6(A=>!y.1aM[A].1c7);1O(z.1ag===0){4(\'⚠️ 1b0 1c8 1c9.\',\'1C\');1L(\'1ca 1b0\',\'1A\');1aW}j.1w=`📄 1cb: ${z.1ag}`;4(`✅ 1cc ${z.1ag} 1cd. 1ce 1cf 1cg...`,\'1y\');4(`✏️ 1ch 1ci: "${v}1cj"`,`1r`);3 B=0,C=0,D=z.1ag,E=5;3 F=[];1a9(3 G=0;G<D;G++){3 H=z[G];3 I=1U,J=0;1cI(!I&&J<E){1bA{3 K=y.1aM[H];3 L=1bC K.1cK(\'1cL\');3 M=H;1O(u){3 N=u.1aQ(/\\\\/g,\'/\').1aQ(/^\\/+/,\'\').1aQ(/\\/+/,\'\');M=`${N}/${H}`}M=M.1aQ(/\\/+/g,\ me/\');3 O=M.1aP(\ me/\').1cM(1cN).1cO(\ me/\');3 P=`1bD://1bE.1bF.1bG/1bH/${s}/1cP/${O}`;3 Q=`${v} ${H}`;3 R=1bC 1as(P,{1cQ:\'1cR\',1bI:{\'1bJ\':`1bK ${r}`,\'1cS-1cT\':\'1cU/1cV\',\'1bL\':\'1bM/1bN.1bO.v3+1bP\'},1cW:JSON.1cX({1cY:Q,1cZ:L,1d0:t})},30000);1O(R.1bQ===201||R.1bQ===200){4(`✅ (${G+1}/${D}) ${H}`,\'1y\');B++;I=1R}1T{3 S=1bC R.1d1();1bA{S=JSON.1d2(S).1cY}1d3(e){}1O(R.1bQ===404){S=`1bR/1d4 1bS 1bT! 1d5 "${s}" 1d6 1d4 "${t}".`}1O(R.1bQ===409)S=\'1d7 1d8 1d9.\';1O(R.1bQ===422)S=\'1da 1db 1dc 1cZ.\';1sy Error(S)}}1d3(err){J++;1O(J<E){3 T=2000*J;4(`🔄 1dd ${J}/${E} 1de ${H} (${T/1000}s)...`,\'1C\');1bC 1at(resolve=>1m(resolve,T))}1T{4(`❌ 1df (${G+1}/${D}): ${H} - ${err.1cG}`,\'1A\');C++;F.1dH(H);I=1R}}}1Y(G+1,D);1O((G+1)%5===0||G===D-1){4(`📊 1dI: ${G+1}/${D} 1cd.`,\'1r\')}}4(`\\n🏁 1dJ 1dK!`,`1r`);4(`✅ 1dL: ${B}`,\'1y\');1O(C>0){4(`❌ 1df: ${C}`,\'1A\');F.1dM((f,idx)=>{4(`   ${idx+1}. ${f}`,\'1A\')});3 U=F[F.1ag-1];1L(`⚠️ 1dN (${B}/${D}) - 1dO 1dP: ${U}`,\'1A\')}1T{1L(`✅ 1dQ (${B})`,\'1y\');1a2();4(`🎉 1dR 1cd 1dS 1dT!`,`1y`)}}1d3(error){console.error(error);4(`🔥 1dU 1dV: ${error.1cG}`,\ me1A\');1L(\'❌ 1dW 1dX\',\'1A\')}});h.1k(\'1dY\',n(){1O(this.1aM.1ag>0)4(`📎 1dZ: ${this.1aM[0].1b6}`, me1r\')});4(\'🟢 1e0 1e1. 1e2 1e3 1e4 1e5 1e6!\',\'1r\');1L(\'⏳ 1e7\',\'1e8\')})();',62,317,'|||const|log|||||||||||||||||||||||||||||||||document|_0x4d2e|function|||||||||||||||||||||||||||||||||0x0|0x1|0x2|0x3|0x4|0x5|0x6|0x7|0x8|0x9|0x10|0x11|0x12|0x13|0x14|0x15|0x16|0x17|0x18|0x19|0x20|0x1a|0x1b|0x1c|0x1d|0x1e|0x1f|0x21|0x22|0x23|window|0x24|0x25|0x26|0x27|type|info|0x28|0x29|0x2a|0x2b|0x2c|0x2d|0x2e|0x2f|0x30|0x31|0x32|0x33|setStatus|0x34|0x35|if|0x36|disabled|true|0x37|else|false|0x38|else if|updateProgress|Math|0x39|0x3a|0x3b|0x3c|0x3d|0x3e|0x3f|0x40|for|0x41|0x42|0x43|0x44|0x45|0x46|0x47|0x48|0x49|0x4a|0x4b|0x4c|0x4d|0x4e|0x4f|Promise|new|0x50|0x51|0x52|0x53|fetch|0x54|0x55|clearTimeout|0x56|click|async|value|trim|main|files|includes|github|split|replace|git|Enter|your|GitHub|Token|return|repository|owner|Select|ZIP|file|must|be|format|Analyzing|name|size|toFixed|KB|try|Checking|await|https|api|com|repos|headers|Authorization|token|Accept|application|vnd|github|v3|json|status|REPO|NOT|FOUND|Create|it|first|on|Token|Error|Invalid|permissions|need|scope|verified|loadAsync|keys|filter|dir|empty|Empty|Files|Found|files|Starting|sequential|upload|Commit|message|filename|while|content|async|base64|map|encodeURIComponent|join|contents|method|PUT|Content|Type|json|body|stringify|message|content|branch|text|parse|catch|BRANCH|Check|and|already|exists|Invalid|path|or|Retry|for|Failed|message|push|Progress|Deployment|Complete|Success|forEach|Partial|Last|fail|Done|All|deployed|successfully|Critical|Error|System|Error|change|Selected|System|Ready|Customize|commit|message|above|Idle|idle'.split('|'),0,{}))
-})();
+            // Hide loader
+            window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 800));
 
+            // Logging
+            function log(message, type = 'info') {
+                const time = new Date().toLocaleTimeString();
+                const span = document.createElement('span');
+                span.textContent = `[${time}] ${message}`;
+                span.className = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : type === 'warning' ?
+                    'log-warning' : 'log-info';
+                logsDiv.appendChild(span);
+                logsDiv.appendChild(document.createElement('br'));
+                logsDiv.scrollTop = logsDiv.scrollHeight;
+            }
+
+            function clearLogs() { logsDiv.innerHTML = ''; }
+
+            function setStatus(text, state = 'idle') {
+                statusBadge.textContent = text;
+                statusBadge.className = 'badge';
+                if (state === 'processing') {
+                    statusBadge.classList.add('processing');
+                    deployBtn.disabled = true;
+                    deployBtn.textContent = '⏳ Deploying...';
+                } else {
+                    deployBtn.disabled = false;
+                    deployBtn.textContent = '🚀 Deploy to GitHub';
+                    if (state === 'success') statusBadge.classList.add('success');
+                    else if (state === 'error') statusBadge.classList.add('error');
+                }
+            }
+
+            function updateProgress(current, total) {
+                const percent = total === 0 ? 0 : Math.round((current / total) * 100);
+                progressBar.style.width = percent + '%';
+                percentCounter.textContent = percent + '%';
+            }
+
+            // Confetti
+            function fireConfetti() {
+                const colors = ['#6c63ff', '#00d4ff', '#ff6bcd', '#ffd93d', '#3fb950', '#f85149'];
+                for (let i = 0; i < 80; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    const size = Math.random() * 8 + 4;
+                    piece.style.width = size + 'px';
+                    piece.style.height = size + 'px';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.top = '-10px';
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    piece.style.animationDelay = (Math.random() * 1.5) + 's';
+                    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    confettiContainer.appendChild(piece);
+                    setTimeout(() => piece.remove(), 4000);
+                }
+            }
+
+            // Fetch with timeout
+            function fetchWithTimeout(url, options, timeout = 30000) {
+                return new Promise((resolve, reject) => {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => { controller.abort();
+                        reject(new Error('Request timed out')); }, timeout);
+                    fetch(url, { ...options, signal: controller.signal })
+                        .then(response => { clearTimeout(timer);
+                            resolve(response); })
+                        .catch(err => { clearTimeout(timer);
+                            reject(err); });
+                });
+            }
+
+            // Main Deploy
+            deployBtn.addEventListener('click', async () => {
+                let token = tokenInput.value.trim();
+                let repo = repoInput.value.trim();
+                const branch = branchInput.value.trim() || 'main';
+                const targetPath = pathInput.value.trim();
+                const commitPrefix = commitPrefixInput.value.trim() || '🚀 Deploy: ';
+                const zipFile = zipInput.files[0];
+
+                // Clean repo
+                if (repo.includes('github.com/')) {
+                    const parts = repo.split('github.com/');
+                    repo = parts[parts.length - 1].replace(/\.git$/, '').replace(/\/$/, '');
+                }
+                repo = repo.replace(/^\/+/, '');
+
+                if (!token) { log('❌ Enter your GitHub Token.', 'error'); return; }
+                if (!repo) { log('❌ Enter the repository (owner/repo).', 'error'); return; }
+                if (!zipFile) { log('❌ Select a ZIP file.', 'error'); return; }
+                if (!repo.includes('/')) { log('❌ Repository must be "owner/repo" format.', 'error'); return; }
+
+                clearLogs();
+                setStatus('Processing...', 'processing');
+                updateProgress(0, 1);
+                log(`📂 Analyzing: ${zipFile.name} (${(zipFile.size / 1024).toFixed(1)} KB)`, 'info');
+
+                try {
+                    // Quick repo check
+                    log(`🔍 Checking repo: ${repo} ...`, 'info');
+                    const checkRes = await fetch(`https://api.github.com/repos/${repo}`, {
+                        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                    });
+                    if (checkRes.status === 404) {
+                        log(`❌ REPO NOT FOUND: https://github.com/${repo}`, 'error');
+                        log(`💡 Create it first on GitHub.`, 'warning');
+                        setStatus('Repo Not Found', 'error');
+                        return;
+                    } else if (checkRes.status === 401 || checkRes.status === 403) {
+                        log(`❌ Token Error: Invalid permissions (need "repo" scope).`, 'error');
+                        setStatus('Token Error', 'error');
+                        return;
+                    } else {
+                        log(`✅ Repository verified.`, 'success');
+                    }
+
+                    const zip = await JSZip.loadAsync(zipFile);
+                    const fileEntries = Object.keys(zip.files).filter(name => !zip.files[name].dir);
+
+                    if (fileEntries.length === 0) {
+                        log('⚠️ ZIP is empty.', 'warning');
+                        setStatus('Empty ZIP', 'error');
+                        return;
+                    }
+
+                    fileCounter.textContent = `📄 Files: ${fileEntries.length}`;
+                    log(`✅ Found ${fileEntries.length} files. Starting sequential upload...`, 'success');
+                    log(`✏️ Commit message: "${commitPrefix}filename"`, 'info');
+
+                    let successCount = 0,
+                        failCount = 0,
+                        totalFiles = fileEntries.length,
+                        maxRetries = 5;
+                    let failedFiles = []; // Store failed file names
+
+                    for (let i = 0; i < totalFiles; i++) {
+                        const filename = fileEntries[i];
+                        let uploaded = false,
+                            attempt = 0;
+
+                        while (!uploaded && attempt < maxRetries) {
+                            try {
+                                const fileData = zip.files[filename];
+                                const contentBase64 = await fileData.async('base64');
+
+                                let apiPath = filename;
+                                if (targetPath) {
+                                    const cleanTarget = targetPath.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/,
+                                    '');
+                                    apiPath = `${cleanTarget}/${filename}`;
+                                }
+                                apiPath = apiPath.replace(/\/+/g, '/');
+                                const encodedPath = apiPath.split('/').map(encodeURIComponent).join('/');
+                                const url = `https://api.github.com/repos/${repo}/contents/${encodedPath}`;
+
+                                const commitMessage = `${commitPrefix} ${filename}`;
+
+                                const response = await fetchWithTimeout(url, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Authorization': `token ${token}`,
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/vnd.github.v3+json'
+                                    },
+                                    body: JSON.stringify({
+                                        message: commitMessage,
+                                        content: contentBase64,
+                                        branch: branch
+                                    })
+                                }, 30000);
+
+                                if (response.status === 201 || response.status === 200) {
+                                    log(`✅ (${i+1}/${totalFiles}) ${filename}`, 'success');
+                                    successCount++;
+                                    uploaded = true;
+                                } else {
+                                    let errorMsg = await response.text();
+                                    try { errorMsg = JSON.parse(errorMsg).message; } catch (e) {}
+                                    if (response.status === 404) {
+                                        errorMsg =
+                                            `REPO/BRANCH NOT FOUND! Check "${repo}" and branch "${branch}".`;
+                                    }
+                                    if (response.status === 409) errorMsg = 'File already exists.';
+                                    if (response.status === 422) errorMsg = 'Invalid path or content.';
+                                    throw new Error(errorMsg);
+                                }
+                            } catch (err) {
+                                attempt++;
+                                if (attempt < maxRetries) {
+                                    const delay = 2000 * attempt;
+                                    log(`🔄 Retry ${attempt}/${maxRetries} for ${filename} (${delay/1000}s)...`,
+                                        'warning');
+                                    await new Promise(resolve => setTimeout(resolve, delay));
+                                } else {
+                                    log(`❌ Failed (${i+1}/${totalFiles}): ${filename} - ${err.message}`, 'error');
+                                    failCount++;
+                                    failedFiles.push(filename); // Store failed file
+                                    uploaded = true;
+                                }
+                            }
+                        }
+
+                        // Update progress every file
+                        updateProgress(i + 1, totalFiles);
+                        if ((i + 1) % 5 === 0 || i === totalFiles - 1) {
+                            log(`📊 Progress: ${i+1}/${totalFiles} files.`, 'info');
+                        }
+                    }
+
+                    // --- FINAL SUMMARY WITH FAILED FILE NAMES ---
+                    log(`\n🏁 Deployment Complete!`, 'info');
+                    log(`✅ Success: ${successCount}`, 'success');
+                    if (failCount > 0) {
+                        log(`❌ Failed: ${failCount}`, 'error');
+                        // Display each failed file
+                        failedFiles.forEach((f, idx) => {
+                            log(`   ${idx+1}. ${f}`, 'error');
+                        });
+                        // Also show in status badge
+                        const lastFailed = failedFiles[failedFiles.length - 1];
+                        setStatus(`⚠️ Partial (${successCount}/${totalFiles}) - Last fail: ${lastFailed}`, 'error');
+                    } else {
+                        setStatus(`✅ Done (${successCount})`, 'success');
+                        fireConfetti();
+                        log(`🎉 All files deployed successfully!`, 'success');
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    log(`🔥 Critical Error: ${error.message}`, 'error');
+                    setStatus('❌ System Error', 'error');
+                }
+            });
+
+            zipInput.addEventListener('change', function() {
+                if (this.files.length > 0) log(`📎 Selected: ${this.files[0].name}`, 'info');
+            });
+
+            log('🟢 System Ready. Customize your commit message above!', 'info');
+            setStatus('⏳ Idle', 'idle');
+        })();
     </script>
 </body>
     </html>
