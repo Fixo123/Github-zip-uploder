@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZIP to GitHub Deployer</title>
-    <!-- JSZip Library for extracting ZIP files client-side -->
+    <!-- JSZip Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         /* -------------------- GLOBAL RESET & BASE -------------------- */
@@ -95,7 +95,6 @@
             transform: translateY(-2px);
         }
 
-        /* Header */
         .header {
             margin-bottom: 28px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -118,7 +117,6 @@
             -webkit-text-fill-color: #8b949e;
         }
 
-        /* Security Warning */
         .warning-note {
             background: rgba(210, 153, 34, 0.08);
             border-left: 4px solid #d29922;
@@ -135,7 +133,6 @@
             color: #f0c04a;
         }
 
-        /* Form Elements */
         .form-group {
             margin-bottom: 18px;
         }
@@ -187,7 +184,6 @@
             flex: 1;
         }
 
-        /* File Input */
         .file-upload-wrapper input[type="file"] {
             padding: 14px;
             cursor: pointer;
@@ -215,7 +211,6 @@
             background: #30363d;
         }
 
-        /* Deploy Button */
         .deploy-btn {
             width: 100%;
             padding: 15px;
@@ -246,7 +241,6 @@
             background: #2a2f3a;
         }
 
-        /* Stats & Badge */
         .stats {
             display: flex;
             justify-content: space-between;
@@ -267,7 +261,6 @@
         .badge.error { border-color: #f85149; color: #f85149; }
         .badge.processing { border-color: #6c63ff; color: #b7b1ff; animation: pulse 1s infinite; }
 
-        /* Logs Terminal */
         #logs {
             margin-top: 18px;
             background: #0a0d13;
@@ -298,7 +291,6 @@
         .log-info { color: #58a6ff; }
         .log-warning { color: #d29922; }
 
-        /* -------------------- FOOTER / CREDIT -------------------- */
         .footer-credit {
             margin-top: 28px;
             text-align: center;
@@ -322,7 +314,6 @@
             filter: drop-shadow(0 0 8px rgba(108, 99, 255, 0.4));
         }
 
-        /* Responsive */
         @media (max-width: 500px) {
             .card { padding: 24px 18px; }
             .row-duo { flex-direction: column; gap: 0; }
@@ -332,28 +323,24 @@
 </head>
 <body>
 
-    <!-- ========== LOADING SCREEN ========== -->
+    <!-- LOADING SCREEN -->
     <div id="loader-overlay">
         <div class="loader-spinner"></div>
         <div class="loader-text">Loading <span>Deployer</span> ...</div>
     </div>
 
-    <!-- ========== MAIN APPLICATION ========== -->
+    <!-- MAIN CARD -->
     <div class="card">
-
-        <!-- Header -->
         <div class="header">
             <h1>📦 ZIP → GitHub Deployer</h1>
             <div class="subtitle">Upload a ZIP, auto-extract & push contents directly to your repository.</div>
         </div>
 
-        <!-- Security Note -->
         <div class="warning-note">
             <span>🔒</span>
             <div><strong>Client-Side Only:</strong> Your Token & ZIP never touch our servers. Everything runs locally in your browser and communicates directly with the GitHub API.</div>
         </div>
 
-        <!-- Form Fields -->
         <div class="form-group">
             <label for="token">🔑 GitHub Personal Access Token</label>
             <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
@@ -387,25 +374,20 @@
 
         <button class="deploy-btn" id="deployBtn">🚀 Deploy to GitHub</button>
 
-        <!-- Stats -->
         <div class="stats">
             <span id="fileCounter">📄 Files: 0</span>
             <span id="statusBadge" class="badge">⏳ Idle</span>
         </div>
 
-        <!-- Logs Terminal -->
         <div id="logs">⚡ System initialized. Awaiting your input...</div>
 
-        <!-- Footer Credit -->
         <div class="footer-credit">
             Developed by <strong>Fixo Dev</strong> 🚀
         </div>
     </div>
 
-    <!-- ========== JAVASCRIPT ENGINE ========== -->
     <script>
         (function() {
-            // DOM Elements
             const tokenInput = document.getElementById('token');
             const repoInput = document.getElementById('repo');
             const branchInput = document.getElementById('branch');
@@ -417,19 +399,16 @@
             const statusBadge = document.getElementById('statusBadge');
             const loader = document.getElementById('loader-overlay');
 
-            // ---------- LOADING SCREEN LOGIC ----------
             window.addEventListener('load', function() {
                 setTimeout(function() {
                     loader.classList.add('hidden');
-                }, 800); // Smooth transition after page load
+                }, 800);
             });
 
-            // ---------- LOGGING SYSTEM ----------
             function log(message, type = 'info') {
                 const time = new Date().toLocaleTimeString();
                 const formatted = `[${time}] ${message}`;
                 const span = document.createElement('span');
-                
                 switch(type) {
                     case 'success': span.className = 'log-success'; break;
                     case 'error': span.className = 'log-error'; break;
@@ -446,7 +425,6 @@
                 logsDiv.innerHTML = '';
             }
 
-            // ---------- STATUS UPDATER ----------
             function setStatus(text, state = 'idle') {
                 statusBadge.textContent = text;
                 statusBadge.className = 'badge';
@@ -462,9 +440,7 @@
                 }
             }
 
-            // ---------- DEPLOY FUNCTION ----------
             deployBtn.addEventListener('click', async () => {
-                // 1. Validate Inputs
                 const token = tokenInput.value.trim();
                 const repo = repoInput.value.trim();
                 const branch = branchInput.value.trim() || 'main';
@@ -481,7 +457,6 @@
                 log(`📂 Analyzing ZIP: ${zipFile.name} (${(zipFile.size / 1024).toFixed(1)} KB)`, 'info');
 
                 try {
-                    // 2. Load and extract ZIP
                     const zip = await JSZip.loadAsync(zipFile);
                     const files = Object.keys(zip.files);
                     const fileEntries = files.filter(name => !zip.files[name].dir);
@@ -497,57 +472,75 @@
 
                     let successCount = 0;
                     let failCount = 0;
+                    const BATCH_SIZE = 10; // එකවර Requests ගොඩක් යැවීම වළක්වන්න
+                    const totalFiles = fileEntries.length;
 
-                    // 3. Upload each file
-                    for (const filename of fileEntries) {
-                        const fileData = zip.files[filename];
-                        const contentBase64 = await fileData.async('base64');
+                    // Function to upload a single file
+                    async function uploadFile(filename) {
+                        try {
+                            const fileData = zip.files[filename];
+                            const contentBase64 = await fileData.async('base64');
 
-                        // Build API path
-                        let apiPath = filename;
-                        if (targetPath) {
-                            const cleanTarget = targetPath.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/, '');
-                            apiPath = `${cleanTarget}/${filename}`;
-                        }
-                        apiPath = apiPath.replace(/\/+/g, '/');
-
-                        const url = `https://api.github.com/repos/${repo}/contents/${apiPath}`;
-                        const payload = {
-                            message: `Deploy: ${filename} via Web ZIP Deployer`,
-                            content: contentBase64,
-                            branch: branch
-                        };
-
-                        log(`⬆️ Uploading: ${filename} ...`, 'info');
-
-                        const response = await fetch(url, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `token ${token}`,
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/vnd.github.v3+json'
-                            },
-                            body: JSON.stringify(payload)
-                        });
-
-                        const responseData = await response.json();
-
-                        if (response.status === 201 || response.status === 200) {
-                            log(`✅ Success: ${filename}`, 'success');
-                            successCount++;
-                        } else {
-                            let errorMsg = responseData.message || 'Unknown API error.';
-                            if (response.status === 409) {
-                                errorMsg = 'File already exists. Delete it first or use a different branch.';
-                            } else if (response.status === 403 && errorMsg.includes('rate limit')) {
-                                errorMsg = 'GitHub API rate limit exceeded. Please wait a moment.';
+                            let apiPath = filename;
+                            if (targetPath) {
+                                const cleanTarget = targetPath.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/, '');
+                                apiPath = `${cleanTarget}/${filename}`;
                             }
-                            log(`❌ Failed: ${filename} - ${errorMsg}`, 'error');
+                            apiPath = apiPath.replace(/\/+/g, '/');
+
+                            // *** මෙයයි FIX එක: සිංහල/යුනිකේත අකුරු සඳහා URL Encode කිරීම ***
+                            const encodedPath = apiPath.split('/').map(encodeURIComponent).join('/');
+                            const url = `https://api.github.com/repos/${repo}/contents/${encodedPath}`;
+
+                            const payload = {
+                                message: `Deploy: ${filename} via Web ZIP Deployer`,
+                                content: contentBase64,
+                                branch: branch
+                            };
+
+                            const response = await fetch(url, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `token ${token}`,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/vnd.github.v3+json'
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            const responseData = await response.json();
+
+                            if (response.status === 201 || response.status === 200) {
+                                log(`✅ Success: ${filename}`, 'success');
+                                successCount++;
+                            } else {
+                                let errorMsg = responseData.message || 'Unknown API error.';
+                                if (response.status === 409) {
+                                    errorMsg = 'File already exists. Delete it first or use a different branch.';
+                                } else if (response.status === 403 && errorMsg.includes('rate limit')) {
+                                    errorMsg = 'GitHub API rate limit exceeded. Please wait a moment.';
+                                }
+                                log(`❌ Failed: ${filename} - ${errorMsg}`, 'error');
+                                failCount++;
+                            }
+                        } catch (err) {
+                            log(`🔥 Upload error for ${filename}: ${err.message}`, 'error');
                             failCount++;
                         }
                     }
 
-                    // 4. Summary
+                    // Process files in batches to avoid overwhelming the browser/API
+                    for (let i = 0; i < totalFiles; i += BATCH_SIZE) {
+                        const batch = fileEntries.slice(i, i + BATCH_SIZE);
+                        const promises = batch.map(file => uploadFile(file));
+                        await Promise.all(promises);
+                        
+                        // Update progress
+                        const processed = Math.min(i + BATCH_SIZE, totalFiles);
+                        log(`📊 Progress: ${processed}/${totalFiles} files processed.`, 'info');
+                    }
+
+                    // Summary
                     log(`\n🏁 Deployment process completed.`, 'info');
                     log(`✅ Successful uploads: ${successCount}`, 'success');
                     if (failCount > 0) log(`❌ Failed uploads: ${failCount}`, 'error');
@@ -555,29 +548,27 @@
                     if (failCount === 0 && successCount > 0) {
                         setStatus(`✅ Done (${successCount} files)`, 'success');
                     } else if (successCount > 0 && failCount > 0) {
-                        setStatus(`⚠️ Partial (${successCount}/${fileEntries.length})`, 'error');
+                        setStatus(`⚠️ Partial (${successCount}/${totalFiles})`, 'error');
                     } else {
                         setStatus('❌ Deployment failed', 'error');
                     }
 
                 } catch (error) {
                     console.error(error);
-                    log(`🔥 Critical Error: ${error.message}`, 'error');
+                    log(`🔥 Critical System Error: ${error.message}`, 'error');
                     setStatus('❌ System Error', 'error');
                 }
             });
 
-            // File selection feedback
             zipInput.addEventListener('change', function() {
                 if (this.files.length > 0) {
                     log(`📎 Selected: ${this.files[0].name}`, 'info');
                 }
             });
 
-            // Initial log
             log('🟢 System Ready. Fill in the details and deploy.', 'info');
             setStatus('⏳ Idle', 'idle');
         })();
     </script>
 </body>
-</html>
+                                                                                                             </html>
