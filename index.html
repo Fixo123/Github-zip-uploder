@@ -3,128 +3,625 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZIP to GitHub Deployer</title>
+    <title>✨ ZIP to GitHub Deployer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: #080a0e; color: #c9d1d9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background-image: radial-gradient(circle at 20% 50%, #1a1f2e 0%, #080a0e 80%); }
-        #loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #080a0e; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.8s ease; gap: 24px; }
-        #loader-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .loader-spinner { width: 60px; height: 60px; border: 4px solid #1e2430; border-top: 4px solid #6c63ff; border-right: 4px solid #00d4ff; border-radius: 50%; animation: spin 1s cubic-bezier(0.6, 0, 0.4, 1) infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loader-text { font-size: 18px; font-weight: 500; color: #8b949e; letter-spacing: 2px; animation: pulse 1.5s ease-in-out infinite; }
-        .loader-text span { color: #6c63ff; font-weight: 700; }
-        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-        .card { background: rgba(21, 25, 35, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 24px; padding: 40px 42px; max-width: 680px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
-        .header { margin-bottom: 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 18px; }
-        h1 { font-size: 30px; font-weight: 800; background: linear-gradient(135deg, #b7b1ff, #6c63ff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .subtitle { color: #8b949e; font-size: 15px; margin-top: 4px; }
-        .warning-note { background: rgba(210, 153, 34, 0.08); border-left: 4px solid #d29922; padding: 12px 16px; border-radius: 8px; font-size: 13px; color: #e3b341; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 10px; }
-        .warning-note strong { color: #f0c04a; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #f0f6fc; margin-bottom: 6px; }
-        label .optional { font-weight: 400; color: #8b949e; font-size: 12px; }
-        input { width: 100%; padding: 12px 16px; background: #0d1117; border: 1px solid #2a2f3a; border-radius: 10px; color: #f0f6fc; font-size: 14px; transition: all 0.25s ease; outline: none; }
-        input:focus { border-color: #6c63ff; box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15); }
-        input::placeholder { color: #4a505c; }
-        .input-hint { font-size: 12px; color: #5a6070; margin-top: 5px; padding-left: 4px; }
-        .row-duo { display: flex; gap: 14px; }
-        .row-duo .form-group { flex: 1; }
-        .file-upload-wrapper input[type="file"] { padding: 14px; cursor: pointer; background: #0d1117; border: 2px dashed #2a2f3a; border-radius: 10px; color: #c9d1d9; transition: border 0.25s ease; width: 100%; }
-        .file-upload-wrapper input[type="file"]:hover { border-color: #6c63ff; }
-        .file-upload-wrapper input[type="file"]::file-selector-button { background: #21262d; border: none; color: #c9d1d9; padding: 8px 18px; border-radius: 6px; margin-right: 16px; cursor: pointer; font-weight: 500; }
-        .file-upload-wrapper input[type="file"]::file-selector-button:hover { background: #30363d; }
-        .deploy-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #6c63ff, #5a52d5); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.25s ease; margin-top: 8px; box-shadow: 0 4px 15px rgba(108, 99, 255, 0.2); }
-        .deploy-btn:hover:not(:disabled) { transform: scale(1.01); box-shadow: 0 6px 25px rgba(108, 99, 255, 0.35); background: linear-gradient(135deg, #7b73ff, #6c63ff); }
-        .deploy-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #2a2f3a; }
-        .stats { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #8b949e; margin-top: 16px; }
-        .badge { background: #1e2430; padding: 4px 14px; border-radius: 30px; font-size: 12px; font-weight: 500; border: 1px solid #2a2f3a; }
-        .badge.success { border-color: #3fb950; color: #3fb950; }
-        .badge.error { border-color: #f85149; color: #f85149; }
-        .badge.processing { border-color: #6c63ff; color: #b7b1ff; animation: pulse 1s infinite; }
-        #logs { margin-top: 18px; background: #0a0d13; border-radius: 12px; padding: 18px 20px; max-height: 350px; overflow-y: auto; border: 1px solid #1a1f2a; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-all; color: #b7c0cc; }
-        #logs::-webkit-scrollbar { width: 5px; }
-        #logs::-webkit-scrollbar-track { background: #0a0d13; }
-        #logs::-webkit-scrollbar-thumb { background: #2a2f3a; border-radius: 10px; }
-        .log-success { color: #3fb950; }
-        .log-error { color: #f85149; }
-        .log-info { color: #58a6ff; }
-        .log-warning { color: #d29922; }
-        .footer-credit { margin-top: 28px; text-align: center; font-size: 14px; color: #5a6070; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 20px; }
-        .footer-credit strong { color: #8b949e; font-weight: 600; background: linear-gradient(135deg, #b7b1ff, #6c63ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        @media (max-width: 500px) { .card { padding: 24px 18px; } .row-duo { flex-direction: column; gap: 0; } h1 { font-size: 24px; } }
+        /* ===== GLOBAL ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+        }
+        body {
+            background: #080a0e;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ===== ANIMATED BACKGROUND ORBS ===== */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: 0;
+            pointer-events: none;
+            animation: floatOrb 12s ease-in-out infinite alternate;
+        }
+        .orb1 {
+            width: 400px;
+            height: 400px;
+            background: #6c63ff;
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: #00d4ff;
+            bottom: -20%;
+            right: -10%;
+            animation-delay: 4s;
+            opacity: 0.25;
+        }
+        .orb3 {
+            width: 300px;
+            height: 300px;
+            background: #ff6bcd;
+            top: 40%;
+            left: 60%;
+            animation-delay: 8s;
+            opacity: 0.15;
+        }
+        @keyframes floatOrb {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                transform: translate(60px, 80px) scale(1.2);
+            }
+        }
+
+        /* ===== LOADING SCREEN ===== */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #080a0e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            gap: 24px;
+        }
+        #loader-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #1e2430;
+            border-top: 4px solid #6c63ff;
+            border-right: 4px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.6, 0, 0.4, 1) infinite;
+            box-shadow: 0 0 30px rgba(108, 99, 255, 0.3);
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .loader-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: #8b949e;
+            letter-spacing: 2px;
+            animation: pulseText 1.5s ease-in-out infinite;
+        }
+        .loader-text span {
+            color: #6c63ff;
+            font-weight: 700;
+        }
+        @keyframes pulseText {
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+        }
+
+        /* ===== MAIN CARD ===== */
+        .card {
+            position: relative;
+            z-index: 1;
+            background: rgba(21, 25, 35, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 32px;
+            padding: 40px 42px;
+            max-width: 720px;
+            width: 100%;
+            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(108, 99, 255, 0.1) inset;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px) scale(1.005);
+            box-shadow: 0 40px 80px -20px rgba(108, 99, 255, 0.15), 0 0 0 1px rgba(108, 99, 255, 0.2) inset;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            margin-bottom: 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header h1 {
+            font-size: 30px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #b7b1ff, #6c63ff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            animation: glowText 3s ease-in-out infinite alternate;
+        }
+        @keyframes glowText {
+            0% {
+                filter: drop-shadow(0 0 5px rgba(108, 99, 255, 0.2));
+            }
+            100% {
+                filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
+            }
+        }
+        .subtitle {
+            color: #8b949e;
+            font-size: 14px;
+            margin-top: 4px;
+            width: 100%;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== WARNING ===== */
+        .warning-note {
+            background: rgba(210, 153, 34, 0.06);
+            border-left: 3px solid #d29922;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #e3b341;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* ===== FORM ===== */
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #f0f6fc;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+        label .optional {
+            font-weight: 400;
+            color: #8b949e;
+            font-size: 12px;
+        }
+        input,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0d1117;
+            border: 1px solid #2a2f3a;
+            border-radius: 12px;
+            color: #f0f6fc;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        input:focus {
+            border-color: #6c63ff;
+            box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1), 0 0 20px rgba(108, 99, 255, 0.05);
+            background: #0a0e14;
+        }
+        input::placeholder {
+            color: #4a505c;
+        }
+        .input-hint {
+            font-size: 12px;
+            color: #5a6070;
+            margin-top: 5px;
+            padding-left: 4px;
+        }
+        .row-duo {
+            display: flex;
+            gap: 14px;
+        }
+        .row-duo .form-group {
+            flex: 1;
+        }
+
+        /* ===== FILE INPUT ===== */
+        .file-upload-wrapper input[type="file"] {
+            padding: 14px;
+            cursor: pointer;
+            background: #0d1117;
+            border: 2px dashed #2a2f3a;
+            border-radius: 12px;
+            color: #c9d1d9;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .file-upload-wrapper input[type="file"]:hover {
+            border-color: #6c63ff;
+            background: #11161f;
+        }
+        .file-upload-wrapper input[type="file"]::file-selector-button {
+            background: #21262d;
+            border: none;
+            color: #c9d1d9;
+            padding: 8px 20px;
+            border-radius: 8px;
+            margin-right: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .file-upload-wrapper input[type="file"]::file-selector-button:hover {
+            background: #30363d;
+            transform: scale(1.02);
+        }
+
+        /* ===== DEPLOY BUTTON ===== */
+        .deploy-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #6c63ff, #5a52d5);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .deploy-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: transform 0.8s ease;
+        }
+        .deploy-btn:hover:not(:disabled)::before {
+            transform: rotate(45deg) translateX(100%);
+        }
+        .deploy-btn:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 8px 35px rgba(108, 99, 255, 0.4);
+            background: linear-gradient(135deg, #7b73ff, #6c63ff);
+        }
+        .deploy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+            background: #2a2f3a;
+            transform: scale(0.98);
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-wrapper {
+            margin-top: 16px;
+            background: #0d1117;
+            border-radius: 30px;
+            height: 6px;
+            overflow: hidden;
+            border: 1px solid #1e2430;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6c63ff, #00d4ff, #6c63ff);
+            background-size: 200% 100%;
+            border-radius: 30px;
+            transition: width 0.4s ease;
+            animation: shimmerProgress 2s linear infinite;
+        }
+        @keyframes shimmerProgress {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ===== STATS ===== */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #8b949e;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .badge {
+            background: #1e2430;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid #2a2f3a;
+            transition: all 0.3s;
+        }
+        .badge.success {
+            border-color: #3fb950;
+            color: #3fb950;
+            box-shadow: 0 0 15px rgba(63, 185, 80, 0.15);
+        }
+        .badge.error {
+            border-color: #f85149;
+            color: #f85149;
+            box-shadow: 0 0 15px rgba(248, 81, 73, 0.15);
+        }
+        .badge.processing {
+            border-color: #6c63ff;
+            color: #b7b1ff;
+            animation: pulseText 1s infinite;
+        }
+
+        /* ===== LOGS TERMINAL ===== */
+        #logs {
+            margin-top: 18px;
+            background: #0a0d13;
+            border-radius: 14px;
+            padding: 18px 20px;
+            max-height: 320px;
+            overflow-y: auto;
+            border: 1px solid #1a1f2a;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #b7c0cc;
+            position: relative;
+            transition: border-color 0.4s;
+        }
+        #logs:focus-within {
+            border-color: #6c63ff;
+        }
+        #logs::-webkit-scrollbar {
+            width: 5px;
+        }
+        #logs::-webkit-scrollbar-track {
+            background: #0a0d13;
+        }
+        #logs::-webkit-scrollbar-thumb {
+            background: #2a2f3a;
+            border-radius: 10px;
+        }
+        .log-success {
+            color: #3fb950;
+        }
+        .log-error {
+            color: #f85149;
+        }
+        .log-info {
+            color: #58a6ff;
+        }
+        .log-warning {
+            color: #d29922;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer-credit {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 14px;
+            color: #5a6070;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 20px;
+            letter-spacing: 0.5px;
+        }
+        .footer-credit strong {
+            color: #8b949e;
+            font-weight: 600;
+            background: linear-gradient(135deg, #b7b1ff, #6c63ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: 0.3s;
+        }
+        .footer-credit:hover strong {
+            filter: drop-shadow(0 0 10px rgba(108, 99, 255, 0.4));
+        }
+
+        /* ===== CONFETTI / CELEBRATION ===== */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                transform: translateY(-10px) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(110vh) rotate(720deg) scale(0.2);
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 500px) {
+            .card {
+                padding: 24px 16px;
+            }
+            .row-duo {
+                flex-direction: column;
+                gap: 0;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <!-- ===== ANIMATED BACKGROUND ===== -->
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+
+    <!-- ===== CONFETTI CONTAINER ===== -->
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <!-- ===== LOADING SCREEN ===== -->
     <div id="loader-overlay">
         <div class="loader-spinner"></div>
         <div class="loader-text">Loading <span>Deployer</span> ...</div>
     </div>
+
+    <!-- ===== MAIN CARD ===== -->
     <div class="card">
         <div class="header">
             <h1>📦 ZIP → GitHub Deployer</h1>
-            <div class="subtitle">Upload a ZIP, auto-extract & push contents directly to your repository.</div>
+            <div class="subtitle">Upload a ZIP, auto-extract & push with your custom commit style.</div>
         </div>
+
         <div class="warning-note">
             <span>🔒</span>
-            <div><strong>Client-Side Only:</strong> Your Token & ZIP never touch our servers.</div>
+            <div><strong>Client-Side Only:</strong> Your Token & ZIP stay in your browser. Nothing touches our servers.</div>
         </div>
+
+        <!-- FORM -->
         <div class="form-group">
             <label for="token">🔑 GitHub Personal Access Token</label>
             <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
             <div class="input-hint">Requires <strong>repo</strong> scope.</div>
         </div>
+
         <div class="form-group">
             <label for="repo">📁 Repository</label>
             <input type="text" id="repo" placeholder="username/repo" value="Fixo123/Dark-dev-social-media-boost" />
-            <div class="input-hint"><strong style="color:#f0883e;">⚠️ Check:</strong> මෙම Repo එක <strong>GitHub මත පවතිනවාද</strong> කියලා බලන්න. (https://github.com/Fixo123/Dark-dev-social-media-boost)</div>
+            <div class="input-hint">Format: <strong>username/repo</strong> (e.g., Fixo123/Dark-dev-social-media-boost)</div>
         </div>
+
         <div class="row-duo">
             <div class="form-group">
                 <label for="branch">🌿 Branch</label>
                 <input type="text" id="branch" value="main" placeholder="main" />
-                <div class="input-hint">ඔබගේ Repo එකේ Branch එක <strong>main</strong> ද <strong>master</strong> ද කියලා බලන්න!</div>
+                <div class="input-hint">Your repo's active branch.</div>
             </div>
             <div class="form-group">
                 <label for="path">📂 Target Folder <span class="optional">(Optional)</span></label>
                 <input type="text" id="path" placeholder="dist / public / (leave empty)" />
+                <div class="input-hint">Leave empty for root.</div>
             </div>
         </div>
+
+        <!-- ===== NEW: CUSTOM COMMIT MESSAGE ===== -->
+        <div class="form-group">
+            <label for="commitPrefix">✏️ Custom Commit Message <span class="optional">(with Emoji!)</span></label>
+            <input type="text" id="commitPrefix" placeholder="e.g., 🚀 Upload: " value="🚀 Deploy: " />
+            <div class="input-hint">Type your favorite emoji + text. Example: <strong>📦 Push: </strong> or <strong>✨ Update: </strong></div>
+        </div>
+
         <div class="form-group">
             <label for="zipInput">📤 Select ZIP File</label>
             <div class="file-upload-wrapper">
                 <input type="file" id="zipInput" accept=".zip" />
             </div>
         </div>
+
         <button class="deploy-btn" id="deployBtn">🚀 Deploy to GitHub</button>
+
+        <!-- Progress Bar -->
+        <div class="progress-wrapper">
+            <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+
         <div class="stats">
             <span id="fileCounter">📄 Files: 0</span>
             <span id="statusBadge" class="badge">⏳ Idle</span>
+            <span id="percentCounter">0%</span>
         </div>
+
         <div id="logs">⚡ System initialized. Awaiting your input...</div>
-        <div class="footer-credit">Developed by <strong>Fixo Dev</strong> 🚀</div>
+
+        <div class="footer-credit">
+            Developed by <strong>Fixo Dev</strong> 🚀
+        </div>
     </div>
 
     <script>
         (function() {
+            // DOM refs
             const tokenInput = document.getElementById('token');
             const repoInput = document.getElementById('repo');
             const branchInput = document.getElementById('branch');
             const pathInput = document.getElementById('path');
+            const commitPrefixInput = document.getElementById('commitPrefix');
             const zipInput = document.getElementById('zipInput');
             const deployBtn = document.getElementById('deployBtn');
             const logsDiv = document.getElementById('logs');
             const fileCounter = document.getElementById('fileCounter');
             const statusBadge = document.getElementById('statusBadge');
+            const progressBar = document.getElementById('progressBar');
+            const percentCounter = document.getElementById('percentCounter');
             const loader = document.getElementById('loader-overlay');
+            const confettiContainer = document.getElementById('confettiContainer');
 
+            // Hide loader
             window.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 800));
 
+            // Logging
             function log(message, type = 'info') {
                 const time = new Date().toLocaleTimeString();
                 const span = document.createElement('span');
                 span.textContent = `[${time}] ${message}`;
-                span.className = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : type === 'warning' ? 'log-warning' : 'log-info';
+                span.className = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : type === 'warning' ?
+                    'log-warning' : 'log-info';
                 logsDiv.appendChild(span);
                 logsDiv.appendChild(document.createElement('br'));
                 logsDiv.scrollTop = logsDiv.scrollHeight;
@@ -147,24 +644,57 @@
                 }
             }
 
+            function updateProgress(current, total) {
+                const percent = total === 0 ? 0 : Math.round((current / total) * 100);
+                progressBar.style.width = percent + '%';
+                percentCounter.textContent = percent + '%';
+            }
+
+            // Confetti burst
+            function fireConfetti() {
+                const colors = ['#6c63ff', '#00d4ff', '#ff6bcd', '#ffd93d', '#3fb950', '#f85149'];
+                for (let i = 0; i < 80; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    const size = Math.random() * 8 + 4;
+                    piece.style.width = size + 'px';
+                    piece.style.height = size + 'px';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.top = '-10px';
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    piece.style.animationDelay = (Math.random() * 1.5) + 's';
+                    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    confettiContainer.appendChild(piece);
+                    setTimeout(() => piece.remove(), 4000);
+                }
+            }
+
+            // Fetch with timeout
             function fetchWithTimeout(url, options, timeout = 30000) {
                 return new Promise((resolve, reject) => {
                     const controller = new AbortController();
-                    const timer = setTimeout(() => { controller.abort(); reject(new Error('Request timed out')); }, timeout);
+                    const timer = setTimeout(() => { controller.abort();
+                        reject(new Error('Request timed out')); }, timeout);
                     fetch(url, { ...options, signal: controller.signal })
-                        .then(response => { clearTimeout(timer); resolve(response); })
-                        .catch(err => { clearTimeout(timer); reject(err); });
+                        .then(response => { clearTimeout(timer);
+                            resolve(response); })
+                        .catch(err => { clearTimeout(timer);
+                            reject(err); });
                 });
             }
 
+            // Main Deploy
             deployBtn.addEventListener('click', async () => {
                 let token = tokenInput.value.trim();
                 let repo = repoInput.value.trim();
                 const branch = branchInput.value.trim() || 'main';
                 const targetPath = pathInput.value.trim();
+                const commitPrefix = commitPrefixInput.value.trim() || '🚀 Deploy: ';
                 const zipFile = zipInput.files[0];
 
-                // Auto-clean repo
+                // Clean repo
                 if (repo.includes('github.com/')) {
                     const parts = repo.split('github.com/');
                     repo = parts[parts.length - 1].replace(/\.git$/, '').replace(/\/$/, '');
@@ -178,47 +708,50 @@
 
                 clearLogs();
                 setStatus('Processing...', 'processing');
-                log(`📂 Analyzing: ${zipFile.name}`, 'info');
+                updateProgress(0, 1);
+                log(`📂 Analyzing: ${zipFile.name} (${(zipFile.size / 1024).toFixed(1)} KB)`, 'info');
 
-                // --- QUICK CHECK: Does the repo exist? (Test with a GET request) ---
-                log(`🔍 Checking repository existence: ${repo} ...`, 'info');
                 try {
+                    // Quick repo check
+                    log(`🔍 Checking repo: ${repo} ...`, 'info');
                     const checkRes = await fetch(`https://api.github.com/repos/${repo}`, {
                         headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                     });
                     if (checkRes.status === 404) {
                         log(`❌ REPO NOT FOUND: https://github.com/${repo}`, 'error');
-                        log(`💡 SOLUTION:`, 'warning');
-                        log(`   1. Go to GitHub and create a new repository named "${repo.split('/')[1]}".`, 'warning');
-                        log(`   2. Or check if you typed the username correctly.`, 'warning');
+                        log(`💡 Create it first on GitHub.`, 'warning');
                         setStatus('Repo Not Found', 'error');
                         return;
                     } else if (checkRes.status === 401 || checkRes.status === 403) {
-                        log(`❌ Token Error: Invalid or missing permissions.`, 'error');
-                        log(`💡 Ensure your token has the "repo" scope.`, 'warning');
+                        log(`❌ Token Error: Invalid permissions (need "repo" scope).`, 'error');
                         setStatus('Token Error', 'error');
                         return;
                     } else {
-                        log(`✅ Repository exists.`, 'success');
+                        log(`✅ Repository verified.`, 'success');
                     }
-                } catch (e) {
-                    log(`⚠️ Could not verify repo (network issue). Continuing...`, 'warning');
-                }
 
-                try {
                     const zip = await JSZip.loadAsync(zipFile);
                     const fileEntries = Object.keys(zip.files).filter(name => !zip.files[name].dir);
 
-                    if (fileEntries.length === 0) { log('⚠️ ZIP is empty.', 'warning'); setStatus('Empty ZIP', 'error'); return; }
+                    if (fileEntries.length === 0) {
+                        log('⚠️ ZIP is empty.', 'warning');
+                        setStatus('Empty ZIP', 'error');
+                        return;
+                    }
 
                     fileCounter.textContent = `📄 Files: ${fileEntries.length}`;
-                    log(`✅ Found ${fileEntries.length} files. Processing sequentially...`, 'success');
+                    log(`✅ Found ${fileEntries.length} files. Starting sequential upload...`, 'success');
+                    log(`✏️ Commit message: "${commitPrefix}filename"`, 'info');
 
-                    let successCount = 0, failCount = 0, totalFiles = fileEntries.length, maxRetries = 5;
+                    let successCount = 0,
+                        failCount = 0,
+                        totalFiles = fileEntries.length,
+                        maxRetries = 5;
 
                     for (let i = 0; i < totalFiles; i++) {
                         const filename = fileEntries[i];
-                        let uploaded = false, attempt = 0;
+                        let uploaded = false,
+                            attempt = 0;
 
                         while (!uploaded && attempt < maxRetries) {
                             try {
@@ -227,12 +760,16 @@
 
                                 let apiPath = filename;
                                 if (targetPath) {
-                                    const cleanTarget = targetPath.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/, '');
+                                    const cleanTarget = targetPath.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/,
+                                    '');
                                     apiPath = `${cleanTarget}/${filename}`;
                                 }
                                 apiPath = apiPath.replace(/\/+/g, '/');
                                 const encodedPath = apiPath.split('/').map(encodeURIComponent).join('/');
                                 const url = `https://api.github.com/repos/${repo}/contents/${encodedPath}`;
+
+                                // ** USING CUSTOM COMMIT PREFIX HERE **
+                                const commitMessage = `${commitPrefix} ${filename}`;
 
                                 const response = await fetchWithTimeout(url, {
                                     method: 'PUT',
@@ -241,7 +778,11 @@
                                         'Content-Type': 'application/json',
                                         'Accept': 'application/vnd.github.v3+json'
                                     },
-                                    body: JSON.stringify({ message: `Deploy: ${filename}`, content: contentBase64, branch: branch })
+                                    body: JSON.stringify({
+                                        message: commitMessage,
+                                        content: contentBase64,
+                                        branch: branch
+                                    })
                                 }, 30000);
 
                                 if (response.status === 201 || response.status === 200) {
@@ -250,22 +791,21 @@
                                     uploaded = true;
                                 } else {
                                     let errorMsg = await response.text();
-                                    try { errorMsg = JSON.parse(errorMsg).message; } catch(e) {}
-                                    
-                                    // *** 404 ERROR DETECTION & CLEAR EXPLANATION ***
+                                    try { errorMsg = JSON.parse(errorMsg).message; } catch (e) {}
                                     if (response.status === 404) {
-                                        errorMsg = `REPO/BRANCH NOT FOUND! Check if "${repo}" exists and branch "${branch}" is correct.`;
+                                        errorMsg =
+                                            `REPO/BRANCH NOT FOUND! Check "${repo}" and branch "${branch}".`;
                                     }
                                     if (response.status === 409) errorMsg = 'File already exists.';
                                     if (response.status === 422) errorMsg = 'Invalid path or content.';
-                                    
                                     throw new Error(errorMsg);
                                 }
                             } catch (err) {
                                 attempt++;
                                 if (attempt < maxRetries) {
                                     const delay = 2000 * attempt;
-                                    log(`🔄 Retry ${attempt}/${maxRetries} for ${filename} (${delay/1000}s)...`, 'warning');
+                                    log(`🔄 Retry ${attempt}/${maxRetries} for ${filename} (${delay/1000}s)...`,
+                                        'warning');
                                     await new Promise(resolve => setTimeout(resolve, delay));
                                 } else {
                                     log(`❌ Failed (${i+1}/${totalFiles}): ${filename} - ${err.message}`, 'error');
@@ -274,15 +814,28 @@
                                 }
                             }
                         }
-                        if ((i + 1) % 10 === 0 || i === totalFiles - 1) {
+
+                        // Update progress every file
+                        updateProgress(i + 1, totalFiles);
+                        if ((i + 1) % 5 === 0 || i === totalFiles - 1) {
                             log(`📊 Progress: ${i+1}/${totalFiles} files.`, 'info');
                         }
                     }
 
-                    log(`\n🏁 Complete! ✅ Success: ${successCount} | ❌ Failed: ${failCount}`, 'info');
-                    if (failCount === 0 && successCount > 0) setStatus(`✅ Done (${successCount})`, 'success');
-                    else if (successCount > 0) setStatus(`⚠️ Partial (${successCount}/${totalFiles})`, 'error');
-                    else setStatus('❌ Failed', 'error');
+                    // Final Summary
+                    log(`\n🏁 Deployment Complete!`, 'info');
+                    log(`✅ Success: ${successCount}`, 'success');
+                    if (failCount > 0) log(`❌ Failed: ${failCount}`, 'error');
+
+                    if (failCount === 0 && successCount > 0) {
+                        setStatus(`✅ Done (${successCount})`, 'success');
+                        fireConfetti(); // 🎊 Celebrate!
+                        log(`🎉 All files deployed successfully with custom commit message!`, 'success');
+                    } else if (successCount > 0) {
+                        setStatus(`⚠️ Partial (${successCount}/${totalFiles})`, 'error');
+                    } else {
+                        setStatus('❌ Failed', 'error');
+                    }
 
                 } catch (error) {
                     console.error(error);
@@ -295,9 +848,9 @@
                 if (this.files.length > 0) log(`📎 Selected: ${this.files[0].name}`, 'info');
             });
 
-            log('🟢 System Ready. Verify your Repository & Branch names!', 'info');
+            log('🟢 System Ready. Customize your commit message above!', 'info');
             setStatus('⏳ Idle', 'idle');
         })();
     </script>
 </body>
-        </html>
+                                        </html>
